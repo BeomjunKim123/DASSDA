@@ -1,0 +1,102 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <title>Detail</title>-->
+<!--  &lt;!&ndash; jquery cdn &ndash;&gt;-->
+<!--  <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<table>-->
+<!--  <tr>-->
+<!--    <th>ID</th>-->
+<!--    <td id="diaryId">아이디</td>-->
+<!--  </tr>-->
+<!--  <tr>-->
+<!--    <th>Title</th>-->
+<!--    <td id="diaryTitle">Loading...</td>-->
+<!--  </tr>-->
+<!--  <tr>-->
+<!--    <th>Contents</th>-->
+<!--    <td id="diaryContents">Loading...</td>-->
+<!--  </tr>-->
+<!--  <tr>-->
+<!--    <th>Date</th>-->
+<!--    <td id="diaryDate">Loading...</td>-->
+<!--  </tr>-->
+<!--</table>-->
+<!--<button onclick="listReq()">목록</button>-->
+<!--<button onclick="updateReq()">수정</button>-->
+<!--<button onclick="deleteReq()">삭제</button>-->
+
+<!--<script>-->
+<!--  function loadDiaryDetail(id) {-->
+<!--      $.ajax({-->
+<!--          url: '/board/detail/' + id,-->
+<!--          method: 'GET',-->
+<!--          dataType: 'json',-->
+<!--          success: function(data) {-->
+<!--              $('#diaryId').text(data.id);-->
+<!--              $('#diaryTitle').text(data.boardTitle);-->
+<!--              $('#diaryContents').text(data.boardContents);-->
+<!--              $('#diaryDate').text(data.boardCreatedTime);-->
+<!--          },-->
+<!--          error: function() {-->
+<!--              console.error("Error loading diary detail");-->
+<!--              // 에러 처리 로직-->
+<!--          }-->
+<!--      });-->
+<!--  }-->
+
+<!--  const listReq = () => {-->
+<!--      console.log("목록 요청");-->
+<!--      location.href = "/board";-->
+<!--  }-->
+
+<!--  const updateReq = () => {-->
+<!--      console.log("수정 요청");-->
+<!--      const id = $('#diaryId').text();-->
+<!--      location.href = "/board/update/" + id;-->
+<!--  }-->
+
+<!--  const deleteReq = () => {-->
+<!--      console.log("삭제 요청");-->
+<!--      const id = $('#diaryId').text();-->
+<!--      location.href = "/board/delete/" + id;-->
+<!--  }-->
+
+<!--  $(document).ready(function() {-->
+<!--    // URL에서 ID 추출-->
+<!--    var currentUrl = window.location.href;-->
+<!--    var id = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);-->
+
+<!--    // 추출한 ID를 사용하여 상세 정보 로드-->
+<!--    loadDiaryDetail(id);-->
+<!--});-->
+
+
+<!--  function openDetailModal(id) {-->
+<!--            loadDiaryDetail(id); // 상세 정보 로딩-->
+<!--            document.getElementById("detailModal").style.display = "block";-->
+<!--        }-->
+
+<!--        function closeDetailModal() {-->
+<!--            document.getElementById("detailModal").style.display = "none";-->
+<!--        }-->
+
+<!--        function loadDiaryDetail(id) {-->
+<!--            // 생략: AJAX 요청 및 상세 정보 로딩 로직-->
+<!--        }-->
+
+<!--        function loadPosts() {-->
+<!--            // 생략: 기존 loadPosts 함수-->
+<!--            // 수정: 게시글 클릭 이벤트 추가-->
+<!--            // 예시: $(document).on('click', '.postLink', function() { ... });-->
+<!--        }-->
+
+<!--        $(document).ready(function() {-->
+<!--            loadPosts(); // 페이지 로드 시 글 목록 불러오기-->
+<!--        });-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->

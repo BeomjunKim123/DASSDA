@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <title>index</title>
+</head>
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+        padding-top: 60px;
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+<button onclick="openModal()">일기장 생성</button>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <form id="diaryForm" method="post"x enctype="multipart/form-data">
+            일기장명: <input type="text" id="boardTitle" name="boardTitle"> <br>
+            <label>디자인 선택:</label><br>
+            <input type="checkbox" name="boardDesign" value="design1"> 디자인1<br>
+            <input type="checkbox" name="boardDesign" value="design2"> 디자인2<br>
+            <input type="checkbox" name="boardDesign" value="design3"> 디자인3<br>
+            <label>스타일 선택:</label><br>
+            <input type="checkbox" name="boardStyle" value="simple"> 심플<br>
+            <input type="checkbox" name="boardStyle" value="detailed"> 디테일<br>
+            <!-- 미리보기: <textarea name="boardContents" cols="30" rows="10"></textarea> <br> -->
+            <input type="submit" value="추가하기">
+        </form>
+    </div>
+</div>
+
+
+<div id="postsSection">
+    <h3>일기장 목록</h3>
+    <table id="postsTable">
+        <tr>
+            <th>아이디</th>
+            <th>제목</th>
+            <th>날짜</th>
+            <th>일기 개수</th>
+        </tr>
+        <!-- 여기에 글 목록이 동적으로 추가됩니다 -->
+    </table>
+</div>
+
+<!-- 상세 정보 모달 -->
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDetailModal()">&times</span>
+        <table>
+            <tr>
+                <th>ID</th>
+                <td id="modalDiaryId"></td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td id="modalDiaryTitle"></td>
+            </tr>
+<!--            <tr>-->
+<!--                <th>Contents</th>-->
+<!--                <td id="modalDiaryContents"></td>-->
+<!--            </tr>-->
+            <tr>
+                <th>Date</th>
+                <td id="modalDiaryDate"></td>
+            </tr>
+            <tr>
+                <th>Number of Entries</th>
+                <td id="modalDiaryNumberOfContents"></td>
+            </tr>
+        </table>
+        <button onclick="listReq()">목록</button>
+        <button onclick="updateReq()">수정</button>
+        <button onclick="deleteDiary(currentDiaryId)">삭제</button>
+        <button onclick="closeDetailModal()">닫기</button>
+    </div>
+</div>
+
+
+
+
+
+<script th:inline="javascript">
+    document.getElementById('diaryForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var formData = new FormData(this);
+    var object = {};
+    formData.forEach((value, key) => {object[key] = value});
+    var json = JSON.stringify(object);
+
+    fetch('/board/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: json
+    })
+    .then(response => response.text()) // 서버 응답을 텍스트로 처리
+    .then(data => {
+        console.log(data); // 성공적으로 처리된 경우, 서버 응답 출력
+        closeModal(); // 모달 닫기
+    })
+    .catch(error => {
+        console.error('Error:', error); // 오류 처리
+    });
+});
+
+    function openModal() {
+        document.getElementById("myModal").style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("myModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById("myModal")) {
+            closeModal();
+        }
+    }
+
+<!-- 디테일 모달을 여는 함수 -->
+    function openDetailModal(id) {
+    currentDiaryId = id;
+    loadDiaryDetail(id); // 상세 정보 로딩
+    document.getElementById("detailModal").style.display = "block";
+    }
+
+    function closeDetailModal() {
+        document.getElementById("detailModal").style.display = "none";
+    }
+
+
+
+
+    function loadPosts() {
+    $.ajax({
+        url: '/board', // 서버 엔드포인트
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            var postsTable = $('#postsTable');
+            data.forEach(function(post) {
+                var postRow = $(`<tr>
+                        <td>${post.id}</td>
+                        <td><a href="/createDiary?diaryId=${post.id}">${post.boardTitle}</a></td>
+                        <td>${formatDate(post.boardCreatedTime)}</td>
+                        <td>${post.numberOfContents}</td> <!-- 일기 개수 표시 -->
+                        <td><button onclick="openDetailModal(${post.id})">일기장 편집</button></td>
+                    </tr>`); // 상세보기 버튼 추가
+
+                postsTable.append(postRow);
+            });
+        },
+        error: function() {
+            console.error("Error loading posts");
+        }
+    });
+}
+
+
+
+function deleteDiary(id) {
+
+            if(confirm("정말로 삭제하시겠습니까?")) {
+                fetch('/delete/' + id, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if(response.ok) {
+                        alert("일기가 삭제되었습니다.");
+                        loadPosts(); // 일기 목록을 다시 불러옵니다.
+                        closeDetailModal(); // 상세 정보 모달을 닫습니다.
+                    } else {
+                        alert("일기 삭제에 실패했습니다.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+var currentDiaryId = null;
+
+
+<!--상세 정보를 로딩하는 함수 -->
+function loadDiaryDetail(id) {
+    $.ajax({
+        url: '/board/detail/' + id,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            $('#modalDiaryId').text(data.id);
+            $('#modalDiaryTitle').text(data.boardTitle);
+            $('#modalDiaryDate').text(data.boardCreatedTime);
+            $('#modalDiaryNumberOfContents').text(data.numberOfContents);
+        },
+        error: function() {
+            console.error("Error loading diary detail");
+        }
+    });
+}
+
+function formatDate(dateString) {
+    var date = new Date(dateString);
+    return date.toISOString().split('T')[0]; // 간단한 날짜 포맷, 수정 가능
+}
+
+$(document).ready(function() {
+    loadPosts(); // 페이지 로드 시 글 목록 불러오기
+    document.getElementById('boardTitle').addEventListener('input', function() {
+            if (this.value.length > 10) {
+                alert("제목은 최대 10글자까지만 입력 가능합니다.");
+                this.value = this.value.slice(0, 10);
+            }
+        });
+    });
+
+
+//////////////////////////////////////////////////////////
+
+function listReq() {
+    // AJAX 요청을 사용하여 목록 데이터를 불러옵니다.
+    $.ajax({
+        url: '/board', // 목록 데이터를 불러올 서버의 URL
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            // 'postsTable' 내용을 새로운 데이터로 업데이트
+            var postsTable = $('#postsTable');
+            postsTable.empty(); // 기존 내용을 비웁니다.
+
+            // 새로운 목록 데이터로 테이블을 채웁니다.
+            data.forEach(function(post) {
+                var postRow = $(`<tr>
+                    <td>${post.id}</td>
+                    <td><a href="/createDiary?diaryId=${post.id}">${post.boardTitle}</a></td>
+
+                    <td>${formatDate(post.boardCreatedTime)}</td>
+                    <td><button onclick="openDetailModal(${post.id})">일기장 편집</button></td>
+                </tr>`);
+                postsTable.append(postRow);
+            });
+
+            // 모달을 닫습니다.
+            closeDetailModal();
+        },
+        error: function() {
+            console.error("Error loading posts");
+        }
+    });
+}
+
+
+function updateReq() {
+    var updatedData = {
+        id: currentDiaryId, // 현재 편집 중인 일기 ID
+        boardTitle: $('#editBoardTitle').val(), // 수정된 제목
+        // 기타 필요한 데이터 추가
+    };
+
+
+
+    $.ajax({
+        url: '/update', // 서버의 업데이트 엔드포인트
+        method: 'POST',
+        contentType: 'application/json', // JSON 형식으로 데이터를 전송
+        data: JSON.stringify(updatedData),
+        success: function(response) {
+            alert("일기가 성공적으로 업데이트되었습니다.");
+            closeDetailModal();
+            loadPosts(); // 일기 목록을 다시 불러옵니다.
+        },
+        error: function() {
+            alert("일기 업데이트에 실패했습니다.");
+        }
+    });
+}
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

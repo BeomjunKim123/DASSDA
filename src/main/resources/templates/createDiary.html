@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <title>일기</title>
+</head>
+<body>
+<h2>일기장 상세</h2>
+<p>ID: <span th:text="${diary.id}"></span></p>
+<p>Title: <span th:text="${diary.boardTitle}"></span></p>
+
+
+<button onclick="saveReq()">일기쓰기</button>
+
+<div id="postsSection">
+    <h3>일기 목록</h3>
+    <table id="postsTable">
+        <tr>
+            <th>아이디</th>
+            <th>제목</th>
+            <th>날짜</th>
+        </tr>
+        <!-- 여기에 글 목록이 동적으로 추가됩니다 -->
+    </table>
+</div>
+
+<script>
+  const saveReq = () => {
+    location.href = "/diary/createDiary";
+  }
+
+  function loadPosts() {
+    $.ajax({
+        url: '/diary', // 서버 엔드포인트 (예제에서 변경된 엔드포인트로 수정)
+        method: 'GET',
+        dataType: 'json',
+        data: {
+            diaryId: '1'
+            },
+        success: function(data) {
+            var postsTable = $('#postsTable');
+            data.forEach(function(post) {
+                var postRow = $(`<tr>
+                    <td>${post.id}</td>
+                    <td><a href="/createDiary?diaryId=${post.id}">${post.diaryTitle}</a></td>
+                    <td>${formatDate(post.boardCreatedTime)}</td>
+                    <td><button onclick="deleteDiaryContent(${post.id})">삭제</button></td> <!-- 삭제 버튼 -->
+                </tr>`);
+                postsTable.append(postRow);
+            });
+        },
+        error: function() {
+            console.error("Error loading posts");
+        }
+    });
+}
+
+function deleteDiaryContent(id) {
+    if (confirm("정말로 이 일기 내용을 삭제하시겠습니까?")) {
+        $.ajax({
+            url: '/delete/diaryContents/' + id, // 서버의 삭제 엔드포인트
+            method: 'DELETE',
+            success: function(response) {
+                alert("일기 내용이 삭제되었습니다.");
+                loadPosts(); // 일기 내용 목록을 다시 불러옵니다.
+            },
+            error: function() {
+                alert("일기 내용 삭제에 실패했습니다.");
+            }
+        });
+    }
+}
+
+// 날짜 형식 변환 함수 (YYYY-MM-DD 형식)
+function formatDate(date) {
+    if (!date) return '';
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+}
+
+// 상세 모달 오픈 함수 (실제 구현 필요)
+function openDetailModal(diaryId) {
+    // 여기에 상세 모달을 여는 로직을 구현하시면 됩니다.
+    console.log('Open modal for diaryId:', diaryId);
+}
+
+// 페이지 로드 시 글 목록 로드
+$(document).ready(function() {
+    loadPosts();
+});
+
+</script>
+</body>
+</html>
