@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
+      layout:decorate="~{layouts/layout}">
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+
+
+            if(code) {
+                $.ajax({
+                    url: 'http://localhost:8080/api/auth/kakao',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ authorizationCode: code }),
+                    success: function(data) {
+                        console.log(data);
+                        initMainPage(data)
+                        window.location.href = '/';
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error', error);
+                    }
+                });
+            }
+
+            function initMainPage(data) {
+                $.ajax({
+                    url: 'api/boards/main/' + data.accessToken,
+                    method: 'GET',
+                    contentType: 'application/json',
+                    success: function() {
+                    },
+                    error: function(xhr, stauts, error) {
+                        console.error('Error', error)
+                    }
+                });
+            }
+        });
+    </script>
+</th:block>
+
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card main-card">
+                <div class="card-body main-cardbody">
+                    <p class="text-center">로그인 해보자</p>
+                    <hr>
+                    <div id="board-container">
+                        <a class="p-2" href="https://kauth.kakao.com/oauth/authorize?client_id=992ac8b159b158f4299b493df0509202&redirect_uri=http://localhost:8080/&response_type=code">
+                            <img src="/photos/kakaologo.png" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
